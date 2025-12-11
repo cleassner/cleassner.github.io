@@ -1,10 +1,620 @@
 <!DOCTYPE html>
-<html>
+
+<html lang="en">
 <head>
-    <title>My Website</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Jazz Practice Generator</title>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body>
-    <h1>Hello World!</h1>
-    <p>This is my website.</p>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+    
+    const Shuffle = ({ size = 24 }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/>
+      </svg>
+    );
+    
+    const Clock = ({ size = 24 }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+      </svg>
+    );
+    
+    const Settings = ({ size = 24 }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v6m9-9h-6m-6 0H3"/>
+      </svg>
+    );
+    
+    const X = ({ size = 24 }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <path d="M18 6 6 18M6 6l12 12"/>
+      </svg>
+    );
+    
+    const Plus = ({ size = 24 }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <path d="M5 12h14M12 5v14"/>
+      </svg>
+    );
+    
+    const Trash2 = ({ size = 24 }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+      </svg>
+    );
+    
+    const Play = ({ size = 24 }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <polygon points="5 3 19 12 5 21 5 3"/>
+      </svg>
+    );
+    
+    const Pause = ({ size = 24 }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>
+      </svg>
+    );
+    
+    const RotateCcw = ({ size = 24 }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8M3 3v5h5"/>
+      </svg>
+    );
+    
+    const History = ({ size = 24 }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/>
+      </svg>
+    );
+    
+    const Volume2 = ({ size = 24 }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+      </svg>
+    );
+    
+    const VolumeX = ({ size = 24 }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/>
+      </svg>
+    );
+    
+    const ThumbsUp = ({ size = 24 }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <path d="M7 10v12M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2h0a3.13 3.13 0 0 1 3 3.88Z"/>
+      </svg>
+    );
+    
+    const ThumbsDown = ({ size = 24 }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <path d="M17 14V2M9 18.12 10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22h0a3.13 3.13 0 0 1-3-3.88Z"/>
+      </svg>
+    );
+
+    const JazzPracticeSpinner = () => {
+      const [spinning, setSpinning] = useState(false);
+      const [result, setResult] = useState(null);
+      const [showSettings, setShowSettings] = useState(false);
+      const [showHistory, setShowHistory] = useState(false);
+      const [practiceStarted, setPracticeStarted] = useState(false);
+      
+      const [timerDuration, setTimerDuration] = useState(5);
+      const [timeRemaining, setTimeRemaining] = useState(null);
+      const [timerActive, setTimerActive] = useState(false);
+      
+      const [bpm, setBpm] = useState(80);
+      const [beatPattern, setBeatPattern] = useState('all');
+      const [metronomeActive, setMetronomeActive] = useState(true);
+      const [currentBeat, setCurrentBeat] = useState(0);
+      const [metronomeMuted, setMetronomeMuted] = useState(false);
+      const audioContextRef = useRef(null);
+      const nextBeatTimeRef = useRef(0);
+      const schedulerIdRef = useRef(null);
+      
+      const [sessionHistory, setSessionHistory] = useState(() => {
+        const saved = localStorage.getItem('jazzHistory');
+        return saved ? JSON.parse(saved) : [];
+      });
+      const [showCompletionDialog, setShowCompletionDialog] = useState(false);
+      
+      const defaultKeys = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
+      const defaultScales = ['Major', 'Melodic Minor', 'Harmonic Minor', 'Dorian', 'Mixolydian', 'Altered', 'Diminished (W-H)', 'Diminished (H-W)', 'Whole Tone'];
+      const defaultExercises = ['Ascending thirds', 'Descending thirds', 'Ascending fourths', 'Descending fourths', 'Triads', '7th arpeggios', 'Diatonic patterns (1-2-3, 2-3-4, etc)', 'Sequences in thirds (1-3-2-4-3-5, etc)', 'Ascending/descending runs', 'Enclosures (chromatic approach)', '1-3-5-7-9 extensions', 'Scalar runs with skips'];
+
+      const [keys, setKeys] = useState(() => {
+        const saved = localStorage.getItem('jazzKeys');
+        return saved ? JSON.parse(saved) : defaultKeys;
+      });
+      
+      const [scales, setScales] = useState(() => {
+        const saved = localStorage.getItem('jazzScales');
+        return saved ? JSON.parse(saved) : defaultScales;
+      });
+      
+      const [exercises, setExercises] = useState(() => {
+        const saved = localStorage.getItem('jazzExercises');
+        return saved ? JSON.parse(saved) : defaultExercises;
+      });
+
+      useEffect(() => { localStorage.setItem('jazzKeys', JSON.stringify(keys)); }, [keys]);
+      useEffect(() => { localStorage.setItem('jazzScales', JSON.stringify(scales)); }, [scales]);
+      useEffect(() => { localStorage.setItem('jazzExercises', JSON.stringify(exercises)); }, [exercises]);
+      useEffect(() => { localStorage.setItem('jazzHistory', JSON.stringify(sessionHistory)); }, [sessionHistory]);
+
+      const [newKey, setNewKey] = useState('');
+      const [newScale, setNewScale] = useState('');
+      const [newExercise, setNewExercise] = useState('');
+
+      const getBaseBPM = (exercise) => {
+        if (exercise.includes('thirds')) return 80;
+        if (exercise.includes('fourths')) return 70;
+        if (exercise.includes('arpeggio')) return 100;
+        if (exercise.includes('runs')) return 60;
+        if (exercise.includes('Triads')) return 90;
+        if (exercise.includes('Enclosures')) return 65;
+        return 75;
+      };
+
+      const getSuggestedBPM = (key, scale, exercise) => {
+        const exactMatches = sessionHistory.filter(s => s.key === key && s.scale === scale && s.exercise === exercise).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        
+        if (exactMatches.length > 0) {
+          const last = exactMatches[0];
+          if (last.success) {
+            return { bpm: Math.min(last.bpm + 5, 300), reason: `Last time: ${last.bpm} BPM 👍` };
+          } else {
+            const recentFailures = exactMatches.slice(0, 2).filter(s => !s.success && s.bpm === last.bpm);
+            if (recentFailures.length >= 2) {
+              return { bpm: Math.max(last.bpm - 10, 40), reason: `Struggled at ${last.bpm}, dropping to rebuild` };
+            }
+            return { bpm: Math.max(last.bpm - 5, 40), reason: `Last time: ${last.bpm} BPM 👎` };
+          }
+        }
+        
+        const similarExercises = sessionHistory.filter(s => s.exercise === exercise);
+        if (similarExercises.length > 0) {
+          const avgBPM = Math.round(similarExercises.reduce((sum, s) => sum + s.bpm, 0) / similarExercises.length);
+          return { bpm: avgBPM, reason: `Avg for this exercise: ${avgBPM} BPM` };
+        }
+        
+        const base = getBaseBPM(exercise);
+        return { bpm: base, reason: `Starting tempo for ${exercise.toLowerCase()}` };
+      };
+
+      useEffect(() => {
+        let interval;
+        if (timerActive && timeRemaining > 0) {
+          interval = setInterval(() => {
+            setTimeRemaining(prev => {
+              if (prev <= 1) {
+                setTimerActive(false);
+                setShowCompletionDialog(true);
+                return 0;
+              }
+              return prev - 1;
+            });
+          }, 1000);
+        }
+        return () => clearInterval(interval);
+      }, [timerActive, timeRemaining]);
+
+      useEffect(() => {
+        audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
+        return () => {
+          if (schedulerIdRef.current) clearTimeout(schedulerIdRef.current);
+          if (audioContextRef.current) audioContextRef.current.close();
+        };
+      }, []);
+
+      useEffect(() => {
+        if (!practiceStarted || !metronomeActive || beatPattern === 'off' || metronomeMuted) {
+          if (schedulerIdRef.current) {
+            clearTimeout(schedulerIdRef.current);
+            schedulerIdRef.current = null;
+          }
+          return;
+        }
+
+        const scheduleAhead = 0.1;
+        const lookahead = 25.0;
+        const secondsPerBeat = 60.0 / bpm;
+
+        const playClick = (time, isDownbeat) => {
+          const osc = audioContextRef.current.createOscillator();
+          const gain = audioContextRef.current.createGain();
+          osc.connect(gain);
+          gain.connect(audioContextRef.current.destination);
+          osc.frequency.value = isDownbeat ? 880 : 440;
+          gain.gain.value = isDownbeat ? 0.3 : 0.15;
+          osc.start(time);
+          osc.stop(time + 0.05);
+        };
+
+        const scheduler = () => {
+          const currentTime = audioContextRef.current.currentTime;
+          
+          while (nextBeatTimeRef.current < currentTime + scheduleAhead) {
+            const beatInBar = currentBeat % 4;
+            let shouldPlay = false;
+            if (beatPattern === 'all') shouldPlay = true;
+            else if (beatPattern === '2and4') shouldPlay = beatInBar === 1 || beatInBar === 3;
+            else if (beatPattern === '1only') shouldPlay = beatInBar === 0;
+            
+            if (shouldPlay) playClick(nextBeatTimeRef.current, beatInBar === 0);
+            setCurrentBeat(prev => prev + 1);
+            nextBeatTimeRef.current += secondsPerBeat;
+          }
+          
+          schedulerIdRef.current = setTimeout(scheduler, lookahead);
+        };
+
+        if (nextBeatTimeRef.current === 0) nextBeatTimeRef.current = audioContextRef.current.currentTime;
+        scheduler();
+
+        return () => { if (schedulerIdRef.current) clearTimeout(schedulerIdRef.current); };
+      }, [practiceStarted, metronomeActive, bpm, beatPattern, currentBeat, metronomeMuted]);
+
+      const spinWheel = () => {
+        setSpinning(true);
+        setPracticeStarted(false);
+        setTimerActive(false);
+        setTimeRemaining(null);
+        setMetronomeActive(false);
+        setCurrentBeat(0);
+        nextBeatTimeRef.current = 0;
+        
+        setTimeout(() => {
+          const randomKey = keys[Math.floor(Math.random() * keys.length)];
+          const randomScale = scales[Math.floor(Math.random() * scales.length)];
+          const randomExercise = exercises[Math.floor(Math.random() * exercises.length)];
+          const suggestion = getSuggestedBPM(randomKey, randomScale, randomExercise);
+          setBpm(suggestion.bpm);
+          setResult({ key: randomKey, scale: randomScale, exercise: randomExercise, suggestion: suggestion.reason });
+          setSpinning(false);
+        }, 1000);
+      };
+
+      const startPractice = () => {
+        setPracticeStarted(true);
+        setTimeRemaining(timerDuration * 60);
+        setTimerActive(true);
+        setMetronomeActive(true);
+        setCurrentBeat(0);
+        nextBeatTimeRef.current = 0;
+      };
+
+      const completeSession = (success) => {
+        const session = {
+          key: result.key,
+          scale: result.scale,
+          exercise: result.exercise,
+          bpm: bpm,
+          duration: timerDuration,
+          success: success,
+          timestamp: new Date().toISOString()
+        };
+        setSessionHistory(prev => [session, ...prev]);
+        setShowCompletionDialog(false);
+        setPracticeStarted(false);
+        setTimerActive(false);
+        setMetronomeActive(false);
+        setTimeRemaining(null);
+      };
+
+      const formatTime = (seconds) => {
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${mins}:${secs.toString().padStart(2, '0')}`;
+      };
+
+      const addItem = (list, setList, newItem, setNewItem) => {
+        if (newItem.trim()) {
+          setList([...list, newItem.trim()]);
+          setNewItem('');
+        }
+      };
+
+      const removeItem = (list, setList, index) => {
+        setList(list.filter((_, i) => i !== index));
+      };
+
+      const getBeatIndicator = () => {
+        const beat = currentBeat % 4;
+        return (
+          <div className="flex gap-2 justify-center">
+            {[0, 1, 2, 3].map(i => (
+              <div key={i} className={`w-3 h-3 rounded-full transition-all ${beat === i ? 'bg-purple-400 scale-150' : 'bg-gray-600'}`} />
+            ))}
+          </div>
+        );
+      };
+
+      if (showHistory) {
+        return (
+          <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 p-4">
+            <div className="max-w-2xl w-full">
+              <div className="flex justify-between items-center mb-6">
+                <h1 className="text-3xl font-bold text-white">Practice History</h1>
+                <button onClick={() => setShowHistory(false)} className="bg-gray-700 hover:bg-gray-600 text-white p-3 rounded-lg">
+                  <X size={24} />
+                </button>
+              </div>
+              <div className="bg-gray-800 rounded-lg p-6 shadow-2xl border border-purple-500 max-h-[70vh] overflow-y-auto">
+                {sessionHistory.length === 0 ? (
+                  <p className="text-gray-400 text-center py-8">No practice sessions yet</p>
+                ) : (
+                  <div className="space-y-4">
+                    {sessionHistory.map((session, i) => (
+                      <div key={i} className="bg-gray-900 rounded-lg p-4 border border-purple-700">
+                        <div className="flex justify-between items-start mb-2">
+                          <div>
+                            <p className="text-white font-bold text-lg">{session.key} {session.scale}</p>
+                            <p className="text-purple-300 text-sm">{session.exercise}</p>
+                          </div>
+                          <span className="text-2xl">{session.success ? '👍' : '👎'}</span>
+                        </div>
+                        <div className="flex justify-between text-sm text-gray-400">
+                          <span>{session.bpm} BPM</span>
+                          <span>{session.duration} min</span>
+                          <span>{new Date(session.timestamp).toLocaleDateString()}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      if (showSettings) {
+        return (
+          <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 p-4">
+            <div className="max-w-2xl w-full">
+              <div className="flex justify-between items-center mb-6">
+                <h1 className="text-3xl font-bold text-white">Settings</h1>
+                <button onClick={() => setShowSettings(false)} className="bg-gray-700 hover:bg-gray-600 text-white p-3 rounded-lg">
+                  <X size={24} />
+                </button>
+              </div>
+              <div className="bg-gray-800 rounded-lg p-6 shadow-2xl border border-purple-500 space-y-6 max-h-[70vh] overflow-y-auto">
+                <div>
+                  <h3 className="text-white font-bold mb-3 flex items-center gap-2"><Clock size={20} />Timer Duration (minutes)</h3>
+                  <input type="number" min="1" max="60" value={timerDuration} onChange={(e) => setTimerDuration(parseInt(e.target.value) || 5)} className="bg-gray-700 text-white px-4 py-2 rounded w-32" />
+                </div>
+                <div>
+                  <h3 className="text-white font-bold mb-3">Keys</h3>
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {keys.map((key, i) => (
+                      <div key={i} className="bg-purple-900 text-white px-3 py-1 rounded flex items-center gap-2">
+                        {key}
+                        <button onClick={() => removeItem(keys, setKeys, i)} className="hover:text-red-400"><Trash2 size={14} /></button>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex gap-2">
+                    <input type="text" value={newKey} onChange={(e) => setNewKey(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && addItem(keys, setKeys, newKey, setNewKey)} placeholder="Add key" className="bg-gray-700 text-white px-3 py-2 rounded flex-1" />
+                    <button onClick={() => addItem(keys, setKeys, newKey, setNewKey)} className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded"><Plus size={20} /></button>
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-white font-bold mb-3">Scales/Modes</h3>
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {scales.map((scale, i) => (
+                      <div key={i} className="bg-purple-900 text-white px-3 py-1 rounded flex items-center gap-2">
+                        {scale}
+                        <button onClick={() => removeItem(scales, setScales, i)} className="hover:text-red-400"><Trash2 size={14} /></button>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex gap-2">
+                    <input type="text" value={newScale} onChange={(e) => setNewScale(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && addItem(scales, setScales, newScale, setNewScale)} placeholder="Add scale" className="bg-gray-700 text-white px-3 py-2 rounded flex-1" />
+                    <button onClick={() => addItem(scales, setScales, newScale, setNewScale)} className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded"><Plus size={20} /></button>
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-white font-bold mb-3">Exercises</h3>
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {exercises.map((exercise, i) => (
+                      <div key={i} className="bg-purple-900 text-white px-3 py-1 rounded flex items-center gap-2 text-sm">
+                        {exercise}
+                        <button onClick={() => removeItem(exercises, setExercises, i)} className="hover:text-red-400"><Trash2 size={14} /></button>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex gap-2">
+                    <input type="text" value={newExercise} onChange={(e) => setNewExercise(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && addItem(exercises, setExercises, newExercise, setNewExercise)} placeholder="Add exercise" className="bg-gray-700 text-white px-3 py-2 rounded flex-1" />
+                    <button onClick={() => addItem(exercises, setExercises, newExercise, setNewExercise)} className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded"><Plus size={20} /></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      return (
+        <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 p-4">
+          <div className="max-w-2xl w-full">
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <h1 className="text-3xl md:text-4xl font-bold text-white mb-1">Jazz Practice Generator</h1>
+                <p className="text-purple-300 text-sm">Random exercises to keep you honest</p>
+              </div>
+              <div className="flex gap-2">
+                <button onClick={() => setShowHistory(true)} className="bg-gray-700 hover:bg-gray-600 text-white p-3 rounded-lg"><History size={24} /></button>
+                <button onClick={() => setShowSettings(true)} className="bg-gray-700 hover:bg-gray-600 text-white p-3 rounded-lg"><Settings size={24} /></button>
+              </div>
+            </div>
+
+            <div className="bg-gray-800 rounded-lg p-6 md:p-8 shadow-2xl border border-purple-500">
+              {!result && !spinning && (
+                <div className="text-center text-gray-400 py-12">
+                  <p className="text-xl mb-4">Hit the button to generate your practice</p>
+                  <p className="text-sm">No escape from those difficult keys anymore...</p>
+                </div>
+              )}
+
+              {spinning && (
+                <div className="text-center py-12">
+                  <div className="inline-block animate-spin text-purple-400 mb-4"><Shuffle size={64} /></div>
+                  <p className="text-white text-xl">Spinning...</p>
+                </div>
+              )}
+
+              {result && !spinning && !practiceStarted && (
+                <div className="space-y-6">
+                  <div className="bg-purple-900 bg-opacity-50 rounded-lg p-6 border border-purple-400">
+                    <p className="text-purple-300 text-sm uppercase tracking-wide mb-2">Key</p>
+                    <p className="text-white text-5xl font-bold">{result.key}</p>
+                  </div>
+                  <div className="bg-purple-900 bg-opacity-50 rounded-lg p-6 border border-purple-400">
+                    <p className="text-purple-300 text-sm uppercase tracking-wide mb-2">Scale/Mode</p>
+                    <p className="text-white text-3xl font-bold">{result.scale}</p>
+                  </div>
+                  <div className="bg-purple-900 bg-opacity-50 rounded-lg p-6 border border-purple-400">
+                    <p className="text-purple-300 text-sm uppercase tracking-wide mb-2">Exercise</p>
+                    <p className="text-white text-2xl font-bold">{result.exercise}</p>
+                  </div>
+                  <div className="bg-gray-900 rounded-lg p-6 border border-purple-400 space-y-4">
+                    <h3 className="text-white font-bold text-lg">Metronome Setup</h3>
+                    <div>
+                      <label className="text-purple-300 text-sm block mb-2">Tempo (BPM)</label>
+                      <div className="flex items-center gap-4">
+                        <button onClick={() => setBpm(Math.max(40, bpm - 5))} className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded">-5</button>
+                        <input type="number" min="40" max="300" value={bpm} onChange={(e) => setBpm(Math.min(300, Math.max(40, parseInt(e.target.value) || 80)))} className="bg-gray-700 text-white px-4 py-2 rounded w-24 text-center text-xl font-bold" />
+                        <button onClick={() => setBpm(Math.min(300, bpm + 5))} className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded">+5</button>
+                      </div>
+                      <p className="text-gray-400 text-sm mt-2">{result.suggestion}</p>
+                    </div>
+                    <div>
+                      <label className="text-purple-300 text-sm block mb-2">Beat Pattern</label>
+                      <div className="grid grid-cols-4 gap-2">
+                        {[
+                          { value: 'all', label: 'All' },
+                          { value: '2and4', label: '2 & 4' },
+                          { value: '1only', label: '1 Only' },
+                          { value: 'off', label: 'Off' }
+                        ].map(pattern => (
+                          <button key={pattern.value} onClick={() => setBeatPattern(pattern.value)} className={`px-4 py-2 rounded font-medium transition-colors ${beatPattern === pattern.value ? 'bg-purple-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'}`}>
+                            {pattern.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  <button onClick={startPractice} className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-4 px-8 rounded-lg text-xl transition-colors">
+                    Start Practice
+                  </button>
+                </div>
+              )}
+
+              {result && practiceStarted && (
+                <div className="space-y-6">
+                  {timeRemaining !== null && (
+                    <div className="bg-gray-900 rounded-lg p-4 border border-purple-400 text-center">
+                      <div className="flex items-center justify-center gap-4 mb-4">
+                        <span className={`text-4xl font-bold ${timeRemaining < 60 ? 'text-red-400' : 'text-purple-300'}`}>
+                          {formatTime(timeRemaining)}
+                        </span>
+                        <div className="flex gap-2">
+                          <button onClick={() => setTimerActive(!timerActive)} className="bg-purple-600 hover:bg-purple-700 text-white p-2 rounded">
+                            {timerActive ? <Pause size={20} /> : <Play size={20} />}
+                          </button>
+                          <button onClick={() => { setTimeRemaining(timerDuration * 60); setTimerActive(false); }} className="bg-gray-700 hover:bg-gray-600 text-white p-2 rounded">
+                            <RotateCcw size={20} />
+                          </button>
+                        </div>
+                      </div>
+                      {beatPattern !== 'off' && (
+                        <div className="space-y-3">
+                          {getBeatIndicator()}
+                          <div className="flex items-center justify-center gap-4">
+                            <span className="text-purple-300 font-bold">{bpm} BPM</span>
+                            <button onClick={() => setMetronomeMuted(!metronomeMuted)} className="bg-gray-700 hover:bg-gray-600 text-white p-2 rounded">
+                              {metronomeMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  <div className="bg-purple-900 bg-opacity-50 rounded-lg p-6 border border-purple-400">
+                    <p className="text-purple-300 text-sm uppercase tracking-wide mb-2">Current Exercise</p>
+                    <p className="text-white text-2xl font-bold">{result.key} {result.scale}</p>
+                    <p className="text-purple-300 text-lg mt-1">{result.exercise}</p>
+                  </div>
+                  <button onClick={() => setShowCompletionDialog(true)} className="w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-8 rounded-lg transition-colors">
+                    Complete Early
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {!practiceStarted && result && (
+              <button onClick={spinWheel} disabled={spinning} className="w-full mt-6 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 text-white font-bold py-4 px-8 rounded-lg text-xl transition-colors flex items-center justify-center gap-3 shadow-lg">
+                <Shuffle size={24} />
+                Spin Again
+              </button>
+            )}
+
+            {!result && (
+              <button onClick={spinWheel} disabled={spinning} className="w-full mt-6 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 text-white font-bold py-4 px-8 rounded-lg text-xl transition-colors flex items-center justify-center gap-3 shadow-lg">
+                <Shuffle size={24} />
+                Generate Practice
+              </button>
+            )}
+
+            {!showSettings && !showHistory && (
+              <div className="mt-8 text-center text-gray-400 text-sm">
+                <p>Set your tempo, then start practice to begin timer + metronome</p>
+                <p className="mt-2">Your practice history tracks progress over time</p>
+              </div>
+            )}
+          </div>
+
+          {showCompletionDialog && (
+            <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50">
+              <div className="bg-gray-800 rounded-lg p-8 max-w-md w-full border border-purple-500">
+                <h2 className="text-white text-2xl font-bold mb-4 text-center">How did that feel?</h2>
+                <p className="text-gray-300 text-center mb-6">
+                  {result.key} {result.scale} - {result.exercise} at {bpm} BPM
+                </p>
+                <div className="flex gap-4">
+                  <button onClick={() => completeSession(true)} className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-6 rounded-lg flex items-center justify-center gap-2 transition-colors">
+                    <ThumbsUp size={24} />
+                    Nailed it
+                  </button>
+                  <button onClick={() => completeSession(false)} className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-6 rounded-lg flex items-center justify-center gap-2 transition-colors">
+                    <ThumbsDown size={24} />
+                    Struggled
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<JazzPracticeSpinner />);
+  </script>
+
 </body>
 </html>
+
+
+
