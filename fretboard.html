@@ -214,7 +214,8 @@
                   {[...Array(numFrets + 1)].map((_, f) => (
                     <div key={f} className="flex-1 text-center text-gray-500 text-xs">
                       {[3, 5, 7, 9].includes(f) && '•'}
-                      {[12, 15].includes(f) && '••'}
+                      {f === 12 && '••'}
+                      {f === 15 && '•'}
                     </div>
                   ))}
                 </div>
@@ -281,3 +282,4 @@
   </script>
 </body>
 </html>
+
